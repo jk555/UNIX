@@ -1,0 +1,19 @@
+
+# >  ping.monitor.log
+cd /home/roboto/monitor/
+#echo "________________________________" | tee -a ping.monitor.log
+cd /home/roboto/monitor/
+for x in `cat ping.list`
+        do
+#        echo "________________________________" | tee -a ping.monitor.log
+#        echo "SERVER $x" | tee -a ping.monitor.log
+#       ping -c 2 $x | tee -a ping.monitor.log
+        echo ~|nc -w 1 $x 22
+        if [[ `echo $?` != 0 ]]; then
+                echo "`date`   $x Not responding to ssh query" | tee -a ping.monitor.log
+                if [ `cat ping.monitor.log|grep -i $x|wc -l` -gt 3 ] && [ `cat ping.monitor.log|grep -i $x|wc -l` -lt 7 ]; then
+                        echo "Sending phone text"
+                        echo "Alert. Server $x may be down   `date`" |mailx -s "Alert. Check out non-responsive Server $x " -S from=root@unixalert email1 email2
+                fi
+        fi
+done
